@@ -54,7 +54,7 @@ class SharedTopBar extends ConsumerWidget implements PreferredSizeWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          cityState.selectedCity ?? 'Select City',
+                          cityState.selectedCity?.name ?? 'Select City',
                           style: Theme.of(
                             context,
                           ).textTheme.headlineSmall?.copyWith(
