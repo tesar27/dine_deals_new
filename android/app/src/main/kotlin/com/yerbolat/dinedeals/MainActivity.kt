@@ -1,4 +1,4 @@
-package com.example.dine_deals
+package com.yerbolat.dinedeals
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/city_provider.dart';
+import '../../core/models/city.dart';
 
 class CitySelectionModal extends ConsumerWidget {
   const CitySelectionModal({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final citiesByCountry = CityNotifier.getCitiesByCountry();
+    final citiesAsync = ref.watch(citiesProvider);
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
@@ -41,48 +42,81 @@ class CitySelectionModal extends ConsumerWidget {
 
           // Cities List
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              itemCount: citiesByCountry.length,
-              itemBuilder: (context, index) {
-                final country = citiesByCountry.keys.elementAt(index);
-                final cities = citiesByCountry[country]!;
+            child: citiesAsync.when(
+              data: (cities) {
+                // Group cities by country
+                final citiesByCountry = <String, List<City>>{};
+                for (final city in cities) {
+                  final country = city.country ?? 'Unknown';
+                  if (!citiesByCountry.containsKey(country)) {
+                    citiesByCountry[country] = [];
+                  }
+                  citiesByCountry[country]!.add(city);
+                }
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Country Header
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Text(
-                        country,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: citiesByCountry.length,
+                  itemBuilder: (context, index) {
+                    final country = citiesByCountry.keys.elementAt(index);
+                    final citiesInCountry = citiesByCountry[country]!;
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Country Header
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Text(
+                            country,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
 
-                    // Cities
-                    ...cities.map(
-                      (city) => ListTile(
-                        title: Text(city),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () {
-                          ref
-                              .read(cityProvider.notifier)
-                              .selectCity(city, country);
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ),
+                        // Cities
+                        ...citiesInCountry.map(
+                          (city) => ListTile(
+                            title: Text(city.name),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () {
+                              ref.read(cityProvider.notifier).selectCity(city);
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ),
 
-                    const SizedBox(height: 16),
-                  ],
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  },
                 );
               },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error:
+                  (error, stack) => Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error, size: 48, color: Colors.red),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Failed to load cities',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          error.toString(),
+                          style: Theme.of(context).textTheme.bodySmall,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
             ),
           ),
         ],

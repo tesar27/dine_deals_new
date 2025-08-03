@@ -1,5 +1,4 @@
 import '../models/restaurant_model.dart';
-import '../constants/app_constants.dart';
 
 class MockDataService {
   // Swiss and bordering cities restaurants mock data

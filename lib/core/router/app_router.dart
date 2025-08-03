@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Import feature pages
 import '../../features/main/presentation/pages/main_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/feed/presentation/pages/feed_page.dart';
 import '../../features/discover/presentation/pages/discover_page.dart';
 import '../../features/bookings/presentation/pages/bookings_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/restaurant/presentation/pages/restaurant_detail_page.dart';
 
 part 'app_router.g.dart';
 
@@ -97,7 +98,18 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
 
       // Other routes without bottom navigation
-      // TODO: Add restaurant detail, cart, checkout, etc.
+      GoRoute(
+        path: '/restaurant/:id',
+        name: 'restaurant-detail',
+        pageBuilder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return MaterialPage<void>(
+            key: state.pageKey,
+            child: RestaurantDetailPage(restaurantId: id),
+          );
+        },
+      ),
+      // TODO: Add cart, checkout, etc.
     ],
     errorBuilder:
         (context, state) => Scaffold(

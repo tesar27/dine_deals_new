@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/models/restaurant_model.dart';
 import '../../core/constants/app_constants.dart';
 
@@ -17,7 +18,11 @@ class RestaurantCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
       ),
       child: InkWell(
-        onTap: onTap,
+        onTap:
+            onTap ??
+            () {
+              context.push('/restaurant/${restaurant.id}');
+            },
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

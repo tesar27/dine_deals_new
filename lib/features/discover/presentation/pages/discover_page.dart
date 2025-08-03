@@ -90,7 +90,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                           'd',
                         ], // Standard CARTO subdomains
                         // It's polite and often required to identify your app
-                        userAgentPackageName: 'com.example.dine_deals',
+                        userAgentPackageName: 'com.yerbolat.dinedeals',
                         additionalOptions: const {
                           'attribution':
                               '© Stadia Maps © OpenMapTiles © OpenStreetMap',
@@ -103,7 +103,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                         urlTemplate:
                             'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',
                         subdomains: const ['a', 'b', 'c', 'd'],
-                        userAgentPackageName: 'com.example.dine_deals',
+                        userAgentPackageName: 'com.yerbolat.dinedeals',
                         additionalOptions: const {
                           'attribution': '© CARTO © OpenStreetMap contributors',
                         },
@@ -242,12 +242,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                           final restaurant = restaurants[index];
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16),
-                            child: RestaurantCard(
-                              restaurant: restaurant,
-                              onTap: () {
-                                print('Tapped restaurant: ${restaurant.name}');
-                              },
-                            ),
+                            child: RestaurantCard(restaurant: restaurant),
                           );
                         }, childCount: restaurants.length),
                       ),

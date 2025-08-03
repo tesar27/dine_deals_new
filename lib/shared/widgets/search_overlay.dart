@@ -172,12 +172,7 @@ class _SearchOverlayState extends ConsumerState<SearchOverlay> {
         final restaurant = results[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
-          child: RestaurantCard(
-            restaurant: restaurant,
-            onTap: () {
-              print('Tapped restaurant: ${restaurant.name}');
-            },
-          ),
+          child: RestaurantCard(restaurant: restaurant),
         );
       },
     );

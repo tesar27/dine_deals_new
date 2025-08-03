@@ -1,22 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
-import 'core/services/supabase_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    await dotenv.load(fileName: '.env');
-    await SupabaseService.initialize();
-    print('Supabase initialized successfully');
-  } catch (e) {
-    print('Error initializing Supabase: $e');
-    print('App will continue without Supabase functionality');
-  }
-
+  // Skip Supabase initialization for now to test the restaurant detail page
   runApp(const ProviderScope(child: DineDealsApp()));
 }
 

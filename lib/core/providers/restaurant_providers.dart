@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/restaurant.dart';
-import '../models/deal.dart';
 import 'repository_providers.dart';
 import 'city_provider.dart';
 

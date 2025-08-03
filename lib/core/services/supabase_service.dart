@@ -10,10 +10,23 @@ class SupabaseService {
 
   // Initialize Supabase
   static Future<void> initialize() async {
-    await Supabase.initialize(
-      url: dotenv.env['SUPABASE_URL']!,
-      anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-    );
+    final supabaseUrl = dotenv.env['SUPABASE_URL'];
+    final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
+
+    if (supabaseUrl == null || supabaseAnonKey == null) {
+      print('Warning: Supabase environment variables not found');
+      print(
+        'Please ensure SUPABASE_URL and SUPABASE_ANON_KEY are set in .env file',
+      );
+      // Use dummy values for development
+      await Supabase.initialize(
+        url: 'https://dummy.supabase.co',
+        anonKey: 'dummy_key',
+      );
+      return;
+    }
+
+    await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
   }
 
   // Authentication methods
