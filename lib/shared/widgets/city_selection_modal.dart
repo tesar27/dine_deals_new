@@ -9,12 +9,76 @@ class CitySelectionModal extends ConsumerWidget {
   // Helper method to identify Swiss cities
   bool _isSwissCity(String cityName) {
     final swissCities = {
-      'zurich', 'geneva', 'basel', 'bern', 'lausanne', 'winterthur',
-      'lucerne', 'st. gallen', 'lugano', 'biel', 'thun', 'köniz',
-      'schaffhausen', 'fribourg', 'chur', 'neuchâtel', 'uster',
-      'sion', 'emmen', 'zug', 'yverdon-les-bains', 'kriens', 'rapperswil-jona'
+      'zurich',
+      'geneva',
+      'basel',
+      'bern',
+      'lausanne',
+      'winterthur',
+      'lucerne',
+      'st. gallen',
+      'lugano',
+      'biel',
+      'thun',
+      'köniz',
+      'schaffhausen',
+      'fribourg',
+      'chur',
+      'neuchâtel',
+      'uster',
+      'sion',
+      'emmen',
+      'zug',
+      'yverdon-les-bains',
+      'kriens',
+      'rapperswil-jona',
     };
     return swissCities.contains(cityName.toLowerCase());
+  }
+
+  // Helper method to get city priority (lower number = higher priority)
+  int _getCityPriority(String cityName) {
+    final majorCities = {
+      'zurich': 1,
+      'geneva': 2,
+      'basel': 3,
+      'bern': 4,
+      'lausanne': 5,
+      'winterthur': 6,
+      'lucerne': 7,
+      'st. gallen': 8,
+      'lugano': 9,
+      'schaffhausen': 10,
+      'zug': 11,
+      'thun': 12,
+      'biel': 13,
+      'köniz': 14,
+      'fribourg': 15,
+      'chur': 16,
+      'neuchâtel': 17,
+      'uster': 18,
+      'sion': 19,
+      'emmen': 20,
+    };
+    
+    return majorCities[cityName.toLowerCase()] ?? 999; // Other cities get low priority
+  }
+
+  // Helper method to sort cities within a country
+  List<City> _sortCities(List<City> cities) {
+    cities.sort((a, b) {
+      final aPriority = _getCityPriority(a.name);
+      final bPriority = _getCityPriority(b.name);
+      
+      // First sort by priority (major cities first)
+      if (aPriority != bPriority) {
+        return aPriority.compareTo(bPriority);
+      }
+      
+      // Then sort alphabetically for cities with same priority
+      return a.name.compareTo(b.name);
+    });
+    return cities;
   }
 
   @override
@@ -60,20 +124,25 @@ class CitySelectionModal extends ConsumerWidget {
                 for (final city in cities) {
                   // Fix: Default to Switzerland for Swiss cities or null countries
                   String country = city.country ?? 'Switzerland';
-                  
+
                   // Ensure Swiss cities are properly categorized
-                  if (country.isEmpty || 
-                      country.toLowerCase() == 'ch' || 
+                  if (country.isEmpty ||
+                      country.toLowerCase() == 'ch' ||
                       country.toLowerCase() == 'schweiz' ||
                       _isSwissCity(city.name)) {
                     country = 'Switzerland';
                   }
-                  
+
                   if (!citiesByCountry.containsKey(country)) {
                     citiesByCountry[country] = [];
                   }
                   citiesByCountry[country]!.add(city);
                 }
+
+                // Sort cities within each country (major cities first)
+                citiesByCountry.forEach((country, cities) {
+                  citiesByCountry[country] = _sortCities(cities);
+                });
 
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
