@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/city_provider.dart';
+import '../../core/providers/location_provider.dart';
 import '../../core/models/city.dart';
 
 class CitySelectionModal extends ConsumerWidget {
@@ -34,51 +35,6 @@ class CitySelectionModal extends ConsumerWidget {
       'rapperswil-jona',
     };
     return swissCities.contains(cityName.toLowerCase());
-  }
-
-  // Helper method to get city priority (lower number = higher priority)
-  int _getCityPriority(String cityName) {
-    final majorCities = {
-      'zurich': 1,
-      'geneva': 2,
-      'basel': 3,
-      'bern': 4,
-      'lausanne': 5,
-      'winterthur': 6,
-      'lucerne': 7,
-      'st. gallen': 8,
-      'lugano': 9,
-      'schaffhausen': 10,
-      'zug': 11,
-      'thun': 12,
-      'biel': 13,
-      'köniz': 14,
-      'fribourg': 15,
-      'chur': 16,
-      'neuchâtel': 17,
-      'uster': 18,
-      'sion': 19,
-      'emmen': 20,
-    };
-    
-    return majorCities[cityName.toLowerCase()] ?? 999; // Other cities get low priority
-  }
-
-  // Helper method to sort cities within a country
-  List<City> _sortCities(List<City> cities) {
-    cities.sort((a, b) {
-      final aPriority = _getCityPriority(a.name);
-      final bPriority = _getCityPriority(b.name);
-      
-      // First sort by priority (major cities first)
-      if (aPriority != bPriority) {
-        return aPriority.compareTo(bPriority);
-      }
-      
-      // Then sort alphabetically for cities with same priority
-      return a.name.compareTo(b.name);
-    });
-    return cities;
   }
 
   @override
@@ -115,6 +71,64 @@ class CitySelectionModal extends ConsumerWidget {
             ),
           ),
 
+          // Self Location Button
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Consumer(
+              builder: (context, ref, child) {
+                final locationState = ref.watch(locationProvider);
+                final isLoading = locationState.status == LocationStatus.requesting;
+
+                return SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            final locationNotifier = ref.read(locationProvider.notifier);
+                            final nearestCity = await locationNotifier.findNearestCity();
+                            
+                            if (nearestCity != null && context.mounted) {
+                              ref.read(cityProvider.notifier).selectCity(nearestCity);
+                              Navigator.of(context).pop();
+                            } else if (context.mounted) {
+                              // Show error dialog for unknown location
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Location Not Found'),
+                                  content: const Text('We couldn\'t find any nearby cities. Please select a city manually.'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(),
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                          },
+                    icon: isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.my_location),
+                    label: Text(isLoading ? 'Finding Location...' : 'Use My Location'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
           // Cities List
           Expanded(
             child: citiesAsync.when(
@@ -139,9 +153,9 @@ class CitySelectionModal extends ConsumerWidget {
                   citiesByCountry[country]!.add(city);
                 }
 
-                // Sort cities within each country (major cities first)
+                // Sort cities within each country alphabetically
                 citiesByCountry.forEach((country, cities) {
-                  citiesByCountry[country] = _sortCities(cities);
+                  cities.sort((a, b) => a.name.compareTo(b.name));
                 });
 
                 return ListView.builder(
