@@ -278,57 +278,76 @@ class _HomePageState extends ConsumerState<HomePage> {
             decoration: BoxDecoration(
               color: Colors.green.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.green.withOpacity(0.3), width: 1),
+              border: Border.all(
+                color: Colors.green.withOpacity(0.3),
+                width: 1,
+              ),
             ),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
                 borderRadius: BorderRadius.circular(12),
-                onTap: isLoading
-                    ? null
-                    : () async {
-                        final locationNotifier = ref.read(locationProvider.notifier);
-                        final nearestCity = await locationNotifier.findNearestCity();
-                        
-                        if (nearestCity != null) {
-                          ref.read(cityProvider.notifier).selectCity(nearestCity);
-                          
-                          // Show success message
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Location updated to ${nearestCity.name}'),
-                                backgroundColor: Colors.green,
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
+                onTap:
+                    isLoading
+                        ? null
+                        : () async {
+                          final locationNotifier = ref.read(
+                            locationProvider.notifier,
+                          );
+                          final nearestCity =
+                              await locationNotifier.findNearestCity();
+
+                          if (nearestCity != null) {
+                            ref
+                                .read(cityProvider.notifier)
+                                .selectCity(nearestCity);
+
+                            // Show success message
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Location updated to ${nearestCity.name}',
+                                  ),
+                                  backgroundColor: Colors.green,
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          } else {
+                            // Show error message
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Couldn\'t find nearby cities. Please select manually.',
+                                  ),
+                                  backgroundColor: Colors.orange,
+                                  duration: Duration(seconds: 3),
+                                ),
+                              );
+                            }
                           }
-                        } else {
-                          // Show error message
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Couldn\'t find nearby cities. Please select manually.'),
-                                backgroundColor: Colors.orange,
-                                duration: Duration(seconds: 3),
-                              ),
-                            );
-                          }
-                        }
-                      },
+                        },
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     isLoading
                         ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.green,
                             ),
-                          )
-                        : const Icon(Icons.my_location, color: Colors.green, size: 24),
+                          ),
+                        )
+                        : const Icon(
+                          Icons.my_location,
+                          color: Colors.green,
+                          size: 24,
+                        ),
                     const SizedBox(height: 8),
                     Text(
                       isLoading ? 'Finding...' : 'My Location',

@@ -41,7 +41,8 @@ class LocationState {
 }
 
 class LocationNotifier extends StateNotifier<LocationState> {
-  LocationNotifier(this._locationService, this._cityRepository) : super(const LocationState());
+  LocationNotifier(this._locationService, this._cityRepository)
+    : super(const LocationState());
 
   final LocationService _locationService;
   final CityRepository _cityRepository;
@@ -59,7 +60,9 @@ class LocationNotifier extends StateNotifier<LocationState> {
         );
 
         // Try to find and select nearest city
-        final nearestCity = await _locationService.findNearestCity(_cityRepository);
+        final nearestCity = await _locationService.findNearestCity(
+          _cityRepository,
+        );
         if (nearestCity != null) {
           ref.read(cityProvider.notifier).selectCity(nearestCity);
         }
@@ -76,10 +79,7 @@ class LocationNotifier extends StateNotifier<LocationState> {
         status = LocationStatus.serviceDisabled;
       }
 
-      state = state.copyWith(
-        status: status,
-        errorMessage: errorMessage,
-      );
+      state = state.copyWith(status: status, errorMessage: errorMessage);
     }
   }
 
@@ -107,10 +107,7 @@ class LocationNotifier extends StateNotifier<LocationState> {
         status = LocationStatus.serviceDisabled;
       }
 
-      state = state.copyWith(
-        status: status,
-        errorMessage: errorMessage,
-      );
+      state = state.copyWith(status: status, errorMessage: errorMessage);
     }
   }
 
@@ -145,12 +142,14 @@ final locationServiceProvider = Provider<LocationService>((ref) {
 });
 
 // Location state provider
-final locationProvider = StateNotifierProvider<LocationNotifier, LocationState>((ref) {
-  return LocationNotifier(
-    ref.watch(locationServiceProvider),
-    ref.watch(cityRepositoryProvider),
-  );
-});
+final locationProvider = StateNotifierProvider<LocationNotifier, LocationState>(
+  (ref) {
+    return LocationNotifier(
+      ref.watch(locationServiceProvider),
+      ref.watch(cityRepositoryProvider),
+    );
+  },
+);
 
 // Provider to get nearest city
 final nearestCityProvider = FutureProvider<City?>((ref) async {

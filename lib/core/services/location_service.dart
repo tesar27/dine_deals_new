@@ -20,11 +20,11 @@ class LocationService {
   /// Request location permission
   Future<LocationPermission> requestPermission() async {
     LocationPermission permission = await Geolocator.checkPermission();
-    
+
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
-    
+
     return permission;
   }
 
@@ -38,14 +38,14 @@ class LocationService {
 
     // Check and request permission
     LocationPermission permission = await checkPermission();
-    
+
     if (permission == LocationPermission.denied) {
       permission = await requestPermission();
       if (permission == LocationPermission.denied) {
         throw Exception('Location permissions are denied');
       }
     }
-    
+
     if (permission == LocationPermission.deniedForever) {
       throw Exception('Location permissions are permanently denied');
     }

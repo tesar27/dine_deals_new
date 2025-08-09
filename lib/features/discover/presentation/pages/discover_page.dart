@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../../core/services/mock_data_service.dart';
 import '../../../../core/providers/city_provider.dart';
+import '../../../../core/providers/location_provider.dart';
 import '../../../../core/providers/search_provider.dart';
 import '../../../../shared/widgets/restaurant_card.dart';
 import '../../../../shared/widgets/shared_top_bar.dart';
@@ -219,6 +220,68 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                         ),
                       ),
                     ),
+
+                  // Floating Location Button
+                  Positioned(
+                    bottom: 20,
+                    right: 20,
+                    child: Consumer(
+                      builder: (context, ref, child) {
+                        final locationState = ref.watch(locationProvider);
+                        final isLoading = locationState.status == LocationStatus.requesting;
+
+                        return FloatingActionButton(
+                          onPressed: isLoading
+                              ? null
+                              : () async {
+                                  final locationNotifier = ref.read(locationProvider.notifier);
+                                  final nearestCity = await locationNotifier.findNearestCity();
+                                  
+                                  if (nearestCity != null && context.mounted) {
+                                    ref.read(cityProvider.notifier).selectCity(nearestCity);
+                                    
+                                    // Show success message
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Location updated to ${nearestCity.name}'),
+                                        backgroundColor: Colors.green,
+                                        duration: const Duration(seconds: 2),
+                                        behavior: SnackBarBehavior.floating,
+                                        margin: const EdgeInsets.all(16),
+                                      ),
+                                    );
+                                  } else if (context.mounted) {
+                                    // Show error message
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Couldn\'t find nearby cities. Please select manually.'),
+                                        backgroundColor: Colors.orange,
+                                        duration: Duration(seconds: 3),
+                                        behavior: SnackBarBehavior.floating,
+                                        margin: EdgeInsets.all(16),
+                                      ),
+                                    );
+                                  }
+                                },
+                          backgroundColor: Colors.white,
+                          foregroundColor: Theme.of(context).primaryColor,
+                          elevation: 8,
+                          child: isLoading
+                              ? SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                )
+                              : const Icon(Icons.my_location, size: 24),
+                        );
+                      },
+                    ),
+                  ),
                 ],
               )
               : CustomScrollView(

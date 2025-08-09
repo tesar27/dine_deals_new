@@ -77,45 +77,60 @@ class CitySelectionModal extends ConsumerWidget {
             child: Consumer(
               builder: (context, ref, child) {
                 final locationState = ref.watch(locationProvider);
-                final isLoading = locationState.status == LocationStatus.requesting;
+                final isLoading =
+                    locationState.status == LocationStatus.requesting;
 
                 return SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: isLoading
-                        ? null
-                        : () async {
-                            final locationNotifier = ref.read(locationProvider.notifier);
-                            final nearestCity = await locationNotifier.findNearestCity();
-                            
-                            if (nearestCity != null && context.mounted) {
-                              ref.read(cityProvider.notifier).selectCity(nearestCity);
-                              Navigator.of(context).pop();
-                            } else if (context.mounted) {
-                              // Show error dialog for unknown location
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('Location Not Found'),
-                                  content: const Text('We couldn\'t find any nearby cities. Please select a city manually.'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(),
-                                      child: const Text('OK'),
-                                    ),
-                                  ],
-                                ),
+                    onPressed:
+                        isLoading
+                            ? null
+                            : () async {
+                              final locationNotifier = ref.read(
+                                locationProvider.notifier,
                               );
-                            }
-                          },
-                    icon: isLoading
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.my_location),
-                    label: Text(isLoading ? 'Finding Location...' : 'Use My Location'),
+                              final nearestCity =
+                                  await locationNotifier.findNearestCity();
+
+                              if (nearestCity != null && context.mounted) {
+                                ref
+                                    .read(cityProvider.notifier)
+                                    .selectCity(nearestCity);
+                                Navigator.of(context).pop();
+                              } else if (context.mounted) {
+                                // Show error dialog for unknown location
+                                showDialog(
+                                  context: context,
+                                  builder:
+                                      (context) => AlertDialog(
+                                        title: const Text('Location Not Found'),
+                                        content: const Text(
+                                          'We couldn\'t find any nearby cities. Please select a city manually.',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed:
+                                                () =>
+                                                    Navigator.of(context).pop(),
+                                            child: const Text('OK'),
+                                          ),
+                                        ],
+                                      ),
+                                );
+                              }
+                            },
+                    icon:
+                        isLoading
+                            ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : const Icon(Icons.my_location),
+                    label: Text(
+                      isLoading ? 'Finding Location...' : 'Use My Location',
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       foregroundColor: Colors.white,
