@@ -6,6 +6,17 @@ import '../../core/models/city.dart';
 class CitySelectionModal extends ConsumerWidget {
   const CitySelectionModal({super.key});
 
+  // Helper method to identify Swiss cities
+  bool _isSwissCity(String cityName) {
+    final swissCities = {
+      'zurich', 'geneva', 'basel', 'bern', 'lausanne', 'winterthur',
+      'lucerne', 'st. gallen', 'lugano', 'biel', 'thun', 'köniz',
+      'schaffhausen', 'fribourg', 'chur', 'neuchâtel', 'uster',
+      'sion', 'emmen', 'zug', 'yverdon-les-bains', 'kriens', 'rapperswil-jona'
+    };
+    return swissCities.contains(cityName.toLowerCase());
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final citiesAsync = ref.watch(citiesProvider);
@@ -47,7 +58,17 @@ class CitySelectionModal extends ConsumerWidget {
                 // Group cities by country
                 final citiesByCountry = <String, List<City>>{};
                 for (final city in cities) {
-                  final country = city.country ?? 'Unknown';
+                  // Fix: Default to Switzerland for Swiss cities or null countries
+                  String country = city.country ?? 'Switzerland';
+                  
+                  // Ensure Swiss cities are properly categorized
+                  if (country.isEmpty || 
+                      country.toLowerCase() == 'ch' || 
+                      country.toLowerCase() == 'schweiz' ||
+                      _isSwissCity(city.name)) {
+                    country = 'Switzerland';
+                  }
+                  
                   if (!citiesByCountry.containsKey(country)) {
                     citiesByCountry[country] = [];
                   }
